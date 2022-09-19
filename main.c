@@ -89,10 +89,39 @@ Set intersect(Set s, Set a)
     return r;
 }
 
+Set compliment(Set s, Set a)
+{
+    Set r = {0};
+
+    if (s.len >= a.len) {
+        for (int i = 0; i < s.len; i++) {
+            if (of(s.elems[i], a) == false) {
+                add_elem(&r, s.elems[i]);
+            }
+        }
+    } else {
+        for (int i = 0; i < a.len; i++) {
+            if (of(a.elems[i], s) == false) {
+                add_elem(&r, a.elems[i]);
+            }
+        }
+    }
+
+    return r;
+}   
+
+char *input()
+{
+    printf("-> ");
+    char i[255];
+    char *s = (char*) malloc(12*sizeof(char));
+    fgets(i, 255, stdin);
+    i[strcspn(i, "\n")] = 0;
+    strcpy(s, i);
+    return s;
+}
+
 int main(void)
 {
-    Set a = {0};
-    Set b = {0};
-
     return 0;
 }
