@@ -4,27 +4,14 @@
 #include <string.h>
 
 #include "lex.c"
+#include "set.c"
 
 #define len(s) (sizeof s / sizeof s[0])
 
-void print(int *s, size_t l)
+bool of(int v, Set s)
 {
-    if (l == 0) {
-        printf("{}\n");
-        return;
-    }
-    
-    printf("{");
-    for (size_t i = 0; i < l - 1; i++) {
-        printf("%d, ", s[i]);
-    }
-    printf("%d}\n", s[l - 1]);
-}
-
-bool is_in(int v, int *s, size_t sz)
-{
-    for (size_t i = 0; i < sz; i++) {
-        if (v == s[i]) {
+    for (int i = 0; i < s.len; i++) {
+        if (v == s.elems[i]) {
             return true;
         }
     }
@@ -32,102 +19,32 @@ bool is_in(int v, int *s, size_t sz)
     return false;
 }
 
-void compliment(int *s, size_t sz_s, int *a, size_t sz_a)
+bool subset(Set s, Set a)
 {
-    int elems[sz_s + sz_a];
-    size_t count = 0;
-
-    if (sz_s >= sz_a) {
-        for (size_t i = 0; i < sz_s; i++) {
-            if (is_in(s[i], a, sz_a) == false) {
-                elems[count] = s[i];
-                count++;
-            }
-        }
-    } else {
-        for (size_t i = 0; i < sz_a; i++) {
-            if (is_in(a[i], s, sz_s) == false) {
-                elems[count] = a[i];
-                count++;
-            }
-        }        
-    }
-    
-    print(elems, count);    
-}
-
-void intersect(int *s, size_t sz_s, int *a, size_t sz_a)
-{
-    int elems[sz_s + sz_a];
-    size_t count = 0;
-
-    if (sz_s >= sz_a) {
-        for (size_t i = 0; i < sz_s; i++) {
-            if (is_in(s[i], a, sz_a) == true) {
-                elems[count] = s[i];
-                count++;
-            }
-        }
-    } else {
-        for (size_t i = 0; i < sz_a; i++) {
-            if (is_in(a[i], s, sz_s) == true) {
-                elems[count] = a[i];
-                count++;
-            }
-        }        
-    }
-    
-    print(elems, count);    
-}
-
-void unions(int *s, size_t sz_s, int *a, size_t sz_a)
-{
-    int elems[sz_s + sz_a];
-    size_t count = 0;
-
-    for (size_t i = 0; i < sz_s; i++) {
-        if (is_in(s[i], elems, count) == false) {
-            elems[count] = s[i];
-            count++;
-        }
-    } 
-    for (size_t i = 0; i < sz_a; i++) {
-        if (is_in(a[i], elems, count) == false) {
-            elems[count] = a[i];
-            count++;
-        }
-    }
-    
-    print(elems, count);
-}
-
-bool subset(int *s, size_t sz_s, int *a, size_t sz_a)
-{
-    if (sz_a > sz_s) {
-        printf("false\n");
+    if (s.len >= a.len || s.len == 0) {
         return false;
     }
-
     
-    for (size_t i = 0; i < sz_a; i++) {
-        if (is_in(s[i], a, sz_a) == false) {
-            printf("false\n");
+    for (int i = 0; i < a.len - 1; i++) {
+        if (of(s.elems[i], a) == false) {
             return false;
         }
     }
     
-    printf("true\n");
     return true;
 }
 
 int main(void)
 {
-    int a[3] = {1, 2, 3};
-    int b[4] = {3, 4, 5, 6};
-    unions(a, len(a), b, len(b));
-    intersect(a, len(a), b, len(b));
-    compliment(a, len(a), b, len(b));
-    subset(a, len(a), b, len(b));
-    
+    Set a = {0};
+    Set b = {0};
+
+    add_elem(&a, 1);
+    add_elem(&a, 2);
+
+    add_elem(&b, 1);
+    add_elem(&b, 2);
+    add_elem(&b, 3);
+
     return 0;
 }
