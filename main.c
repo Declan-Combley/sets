@@ -49,7 +49,7 @@ bool subset(Set s, Set a)
     return true;
 }
 
-Set unions(Set s, Set a)
+Set union_(Set s, Set a)
 {
     Set r = s;
 
@@ -65,6 +65,27 @@ Set unions(Set s, Set a)
         }
     }
 
+    return r;
+}
+
+Set intersect(Set s, Set a)
+{
+    Set r = {0};
+
+    if (s.len >= a.len) {
+        for (int i = 0; i < s.len; i++) {
+            if (of(s.elems[i], a) == true) {
+                add_elem(&r, s.elems[i]);
+            }
+        }
+    } else {
+        for (int i = 0; i < a.len; i++) {
+            if (of(a.elems[i], s) == true) {
+                add_elem(&r, a.elems[i]);
+            }
+        }
+    }
+    
     return r;
 }
 
