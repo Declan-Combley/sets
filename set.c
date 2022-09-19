@@ -3,12 +3,12 @@
 
 typedef struct Set {
     int elems[255];
-    size_t len;
+    int len;
 } Set;
 
 void print_set(Set a)
 {
-    size_t l = a.len;
+    int l = a.len;
     int *s = a.elems;
 
     if (l == 0) {
@@ -17,14 +17,14 @@ void print_set(Set a)
     }
     
     printf("{");
-    for (size_t i = 0; i < l - 2; i++) {
+    for (int i = 0; i < l - 1; i++) {
         printf("%d, ", s[i]);
     }
-    printf("%d} ", s[l - 2]);
+    printf("%d}\n", s[l - 1]);
 }
 
 void add_elem(Set *s, int n)
 {
-    s->elems[s->len - 1] = n;
+    s->elems[s->len] = n;
     s->len++;
 }
