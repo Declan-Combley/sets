@@ -19,6 +19,21 @@ bool of(int v, Set s)
     return false;
 }
 
+bool eq(Set s, Set a)
+{
+    if (s.len != a.len) {
+        return false;
+    }
+
+    for (int i = 0; i < a.len; i++) {
+        if (of(s.elems[i], a) == false) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool subset(Set s, Set a)
 {
     if (s.len >= a.len || s.len == 0) {
@@ -34,17 +49,29 @@ bool subset(Set s, Set a)
     return true;
 }
 
+Set unions(Set s, Set a)
+{
+    Set r = s;
+
+    for (int i = 0; i <= a.len; i++) {
+        if (of(a.elems[i], s) == false) {
+            add_elem(&r, s.elems[i]);
+        }
+    }
+    
+    for (int i = 0; i <= s.len; i++) {
+        if (of(s.elems[i], a) == false) {
+            add_elem(&r, a.elems[i]);
+        }
+    }
+
+    return r;
+}
+
 int main(void)
 {
     Set a = {0};
     Set b = {0};
-
-    add_elem(&a, 1);
-    add_elem(&a, 2);
-
-    add_elem(&b, 1);
-    add_elem(&b, 2);
-    add_elem(&b, 3);
 
     return 0;
 }
