@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -8,13 +9,19 @@ typedef enum TokenKind {
     CloseBracket,
     OpenParenthesis,
     CloseParenthesis,
+    ForwardSlash,
+    Hyphon,
+    Pipe,
     Empty,
     Comma,
+
+    // Types 
     Num,
     Character,
 
     // Key Words
     Not,
+    Compliment,
     Union,
     Intersect,
     SubSet,
@@ -24,23 +31,27 @@ typedef enum TokenKind {
     End,
 } TokenKind;
 
-const char tokens[][17] = {
+char tokens[][18] = {
     "OpenBracket",
     "CloseBracket",
     "OpenParenthesis",
     "CloseParenthesis",
+    "ForwardSlash",
+    "Hyphon",
+    "Pipe",
     "Empty",
     "Comma",
     "Num",
     "Character",
     "Not",
+    "Compliment",
     "Union",
     "Intersect",
     "SubSet",
     "Of",
     "Err",
     "End"
-};
+};    
 
 typedef struct Token {
     TokenKind kind;
@@ -65,6 +76,8 @@ Token to_token(char t)
     else if (t == ')')        {token.kind = CloseParenthesis;}
     else if (t == ',')        {token.kind = Comma;           }
     else if (t == ' ')        {token.kind = Empty;           }
+    else if (t == '|')        {token.kind = Pipe;            }
+    else if (t == '\\')       {token.kind = ForwardSlash;    }
     else if (isdigit(t) == 0) {token.kind = Character;       }
     else if (isdigit(t) != 0) {
         token.kind = Num;
@@ -149,3 +162,8 @@ Token *tokenize(char *s)
 
     return tokens;
 }
+
+//int main(void)
+//{
+//    return 0;
+//}
