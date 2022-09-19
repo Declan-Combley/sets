@@ -25,6 +25,20 @@ void print_set(Set a)
 
 void add_elem(Set *s, int n)
 {
+    if (n == 0) {
+        return;
+    }
+    
+    for (int i = 0; i < s->len; i++) {
+        if (n == s->elems[i]) {
+            return;
+        }
+    }
     s->elems[s->len] = n;
     s->len++;
 }
+
+void print_bool(bool b)
+{
+    fputs((b) ? "true": "false", stdout);
+}    
