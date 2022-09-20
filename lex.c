@@ -14,10 +14,13 @@ typedef enum TokenKind {
     Pipe,
     Empty,
     Comma,
+    Chevron,
+    Eq,
 
     // Types 
     Num,
     Character,
+    String,
 
     // Key Words
     Not,
@@ -31,7 +34,7 @@ typedef enum TokenKind {
     End,
 } TokenKind;
 
-char tokens[][18] = {
+char tokens[][20] = {
     "OpenBracket",
     "CloseBracket",
     "OpenParenthesis",
@@ -41,8 +44,11 @@ char tokens[][18] = {
     "Pipe",
     "Empty",
     "Comma",
+    "Chevron",
+    "Eq",
     "Num",
     "Character",
+    "String",
     "Not",
     "Compliment",
     "Union",
@@ -55,16 +61,10 @@ char tokens[][18] = {
 
 typedef struct Token {
     TokenKind kind;
+    char string[255];
     char value;
     int num;
 } Token;
-
-void print_token(Token t)
-{
-    if      (t.kind == Character) { printf("{ %s : '%c' }\n", tokens[t.kind], t.value);}
-    else if (t.kind == Num)       { printf("{ %s : %d }  \n", tokens[t.kind], t.num);  } 
-    else                          { printf("{ %s }       \n", tokens[t.kind]);         }
-}
 
 Token to_token(char t)
 {
@@ -77,6 +77,8 @@ Token to_token(char t)
     else if (t == ',')        {token.kind = Comma;           }
     else if (t == ' ')        {token.kind = Empty;           }
     else if (t == '|')        {token.kind = Pipe;            }
+    else if (t == '=')        {token.kind = Eq;              }
+    else if (t == '^')        {token.kind = Chevron;         }
     else if (t == '\\')       {token.kind = ForwardSlash;    }
     else if (isdigit(t) == 0) {token.kind = Character;       }
     else if (isdigit(t) != 0) {
@@ -92,13 +94,23 @@ Token to_token(char t)
     return token;
 }
 
+void print_token(Token t)
+{
+    if      (t.kind == Character) { printf("{ %s : '%c' } ", tokens[t.kind], t.value);}
+    else if (t.kind == String)    { printf("{ %s : %s } ", tokens[t.kind], t.string);  } 
+    else if (t.kind == Num)       { printf("{ %s : %d } ", tokens[t.kind], t.num);  } 
+    else                          { printf("{ %s } ", tokens[t.kind]);         }
+}
+
 void print_tokens(Token *t)
 {
     int i = 0;
-    while (t[i].kind != End) {
+    while (t[i + 1].kind != End) {
         print_token(t[i]);
         i++;
-    }    
+    }
+    print_token(t[i++]);
+    printf("\n");
 }
 
 Token *tokenize(char *s)
@@ -141,8 +153,9 @@ Token *tokenize(char *s)
             else if (strcmp(s, "subset"   ) == 0) { tokens[counter].kind = SubSet;    }
             else if (strcmp(s, "of"       ) == 0) { tokens[counter].kind = Of;        }
             else {
-                tokens[counter].kind = Err;
-                tokens[counter].value = Err;
+                strcpy(tokens[counter].string, s);
+                tokens[counter].kind = String;
+                tokens[counter].value = ' ';
             }
             tokens[counter].num = 0;
             tokens[counter].value = 'f';
@@ -162,8 +175,3 @@ Token *tokenize(char *s)
 
     return tokens;
 }
-
-//int main(void)
-//{
-//    return 0;
-//}
