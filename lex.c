@@ -119,7 +119,7 @@ Token *tokenize(char *s)
     size_t counter = 0;
     
     Token tmp_tokens[len + 1];
-    Token *tokens = malloc(len * sizeof(Token));
+    Token *tokens = malloc(255 * sizeof(Token));
 
     for (size_t i = 0; i < len; i++) {
         tmp_tokens[i] = to_token(s[i]);

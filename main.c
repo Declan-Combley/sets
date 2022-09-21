@@ -155,31 +155,26 @@ Set compliment(Set s, Set a)
     return r;
 }
 
-char *input()
-{
-    printf("-> ");
-    char *s = (char *) malloc(255 * sizeof(char *));
-    fgets(s, 255, stdin);
-    s[strcspn(s, "\n")] = 0;
-    return s;
-}
-
 void start() {
     while (1) {
-        char *in = input();
+        printf("-> ");
+        char in[255];
+        fgets(in, 255, stdin);
+        in[strcspn(in, "\n")] = 0;
+
         Token *t = tokenize(in);
         bool c = true;
 
-        if (t[0].kind == Character) {
+        if (t[0].kind == Character && t[1].kind != End) {
             if (t[1].kind != Eq) {
                 fprintf(stderr, "    %c must be initialized\n", t[0].value);
                 fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
-                goto free;
+                continue;
             }
             if (t[2].kind != OpenBracket || t[2].kind == End) {
                 fprintf(stderr, "    %c expected an opening bracket\n", t[0].value);
                 fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
-                goto free;
+                continue;
             }
             if (t[3].kind == End) {
                 fprintf(stderr, "    %c must be intiialized\n", t[0].value);
@@ -308,8 +303,6 @@ void start() {
                 print_hash(get_hash_from_table(t[0].value, sets));
             }
         }
-        free:
-        free(in);
     }
 }
 
