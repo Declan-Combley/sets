@@ -13,7 +13,7 @@ typedef struct Hash {
 } Hash;
 
 typedef struct Table {
-    Hash hash[26];
+    Hash hash[26 * 2];
     size_t index;
 } Table;
 
@@ -37,7 +37,7 @@ Hash get_hash_from_table(char h, Table t)
 
 void print_hash(Hash h)
 {
-    printf("%c -> ", h.name);
+    printf("     %c -> ", h.name);
     print_set(h.set);
 }
 
@@ -158,11 +158,9 @@ Set compliment(Set s, Set a)
 char *input()
 {
     printf("-> ");
-    char i[255];
-    char *s = (char *) malloc(255 * sizeof(char *) * 3);
-    fgets(i, 255, stdin);
-    i[strcspn(i, "\n")] = 0;
-    strcpy(s, i);
+    char *s = (char *) malloc(255 * sizeof(char *));
+    fgets(s, 255, stdin);
+    s[strcspn(s, "\n")] = 0;
     return s;
 }
 
@@ -173,16 +171,15 @@ void start() {
         bool c = true;
 
         if (t[0].kind == Character) {
-            // TODO: Fix malloc error here
             if (t[1].kind != Eq) {
                 fprintf(stderr, "    %c must be initialized\n", t[0].value);
                 fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
-                continue;
+                goto free;
             }
             if (t[2].kind != OpenBracket || t[2].kind == End) {
                 fprintf(stderr, "    %c expected an opening bracket\n", t[0].value);
                 fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
-                continue;
+                goto free;
             }
             if (t[3].kind == End) {
                 fprintf(stderr, "    %c must be intiialized\n", t[0].value);
@@ -311,7 +308,7 @@ void start() {
                 print_hash(get_hash_from_table(t[0].value, sets));
             }
         }
-        //printf("passed\n");
+        free:
         free(in);
     }
 }
