@@ -13,7 +13,7 @@ void print_set(Set a)
     int *s = a.elems;
 
     if (l == 0) {
-        printf("{}\n");
+        printf("   {}\n");
         return;
     }
     
