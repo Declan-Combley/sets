@@ -163,40 +163,32 @@ void start() {
         in[strcspn(in, "\n")] = 0;
 
         Token *t = tokenize(in);
-        bool c = true;
+        bool new_set = false;
 
         if (t[0].kind == Character && t[1].kind != End) {
-            if (t[1].kind != Eq) {
+            if (t[1].kind != Eq || t[2].kind != OpenBracket || t[3].kind == End) {
                 fprintf(stderr, "    %c must be initialized\n", t[0].value);
                 fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
                 continue;
-            }
-            if (t[2].kind != OpenBracket || t[2].kind == End) {
+            } else if (t[2].kind != OpenBracket || t[2].kind == End) {
                 fprintf(stderr, "    %c expected an opening bracket\n", t[0].value);
                 fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
                 continue;
-            }
-            if (t[3].kind == End) {
-                fprintf(stderr, "    %c must be intiialized\n", t[0].value);
-                fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
-                continue;
-            }
-            if (t[3].kind == CloseBracket) {
+            } else if (t[3].kind == CloseBracket) {
                 fprintf(stderr, "    Set %c must have at least one element\n", t[0].value);
                 continue;
-            }
-            if (t[3].kind != Num) {
+            } else if (t[3].kind != Num) {
                 if (t[3].kind == Character) {
                     fprintf(stderr, "    Set %c must contain only numbers: %c is invalid\n", t[0].value, t[3].value);
                 } else {
                     fprintf(stderr, "    Set %c must contain only numbers: %s is invalid\n", t[0].value, t[3].string);
                 }
-                
                 continue;
             }
 
+            new_set = true;
             int i = 4;
-            while (t[i].kind != End) {
+            while (t[i].kind != End && new_set) {
                 if (t[i].kind == CloseBracket && t[i + 1].kind != End) {
                     fprintf(stderr, "   Set is already complete\n");
                     fprintf(stderr, "       | try > %c = {%d, ", t[0].value, t[3].num);
@@ -208,19 +200,17 @@ void start() {
                         tmp++;
                     }
                     printf("%d}\n", t[tmp].num);
-                    c = false;
+                    new_set = false;
                     break;
-                }
-                if (t[i].kind != Num && t[i].kind != Comma && t[i].kind != CloseBracket) {
+                } else if (t[i].kind != Num && t[i].kind != Comma && t[i].kind != CloseBracket) {
                     if (t[i].kind == Character) {
                         fprintf(stderr, "    Set %c must contain only numbers: %c is invalid\n", t[0].value, t[i].value);
                     } else {
                         fprintf(stderr, "    Set %c must contain only numbers: %s is invalid\n", t[0].value, t[i].string);
                     }
-                    c = false;
+                    new_set = false;
                     break;
-                }
-                if (i % 2 == 0 && t[i].kind != Comma && t[i].kind != CloseBracket) {
+                } else if (i % 2 == 0 && t[i].kind != Comma && t[i].kind != CloseBracket) {
                     fprintf(stderr, "    Each element of a set must be seperated by a comma\n");
                     fprintf(stderr, "       | try > %c = {%d, ", t[0].value, t[3].num);
                     int tmp = 4;
@@ -231,17 +221,16 @@ void start() {
                         tmp++;
                     }
                     printf("%d}\n", t[tmp - 1].num);
-                    c = false;
+                    new_set = false;
                     break;
-                }
-                if (i % 2 == 0 && t[i].kind != CloseBracket && t[i + 1].kind != Num) {
+                } else if (i % 2 == 0 && t[i].kind != CloseBracket && t[i + 1].kind != Num) {
                     if (t[i].kind == String || t[i].kind == Character) {
                         if (t[i].kind == Character) {
                             fprintf(stderr, "    Set %c must contain only numbers, element %c is invalid\n", t[0].value, t[i].value);
                         } else {
                             fprintf(stderr, "    Set %c must contain only numbers, element %s is invalid\n", t[0].value, t[i].string);
                         }
-                        c = false;
+                        new_set = false;
                         break;
                     } else if (t[i + 1].kind == String || t[i + 1].kind == Character) {
                         if (t[i].kind == Character) {
@@ -249,7 +238,7 @@ void start() {
                         } else {
                             fprintf(stderr, "    Set %c must contain only numbers, element %s is invalid\n", t[0].value, t[i + 1].string);
                         }
-                        c = false;
+                        new_set = false;
                         break;
                     }
                     
@@ -263,10 +252,9 @@ void start() {
                         tmp++;
                     }
                     printf("x}\n");
-                    c = false;
+                    new_set = false;
                     break;
-                }
-                if (t[i + 1].kind == End && t[i].kind != CloseBracket) {
+                } else if (t[i + 1].kind == End && t[i].kind != CloseBracket) {
                     fprintf(stderr, "    Expected a closing bracket\n");
                     fprintf(stderr, "       | try > %c = {%d, ", t[0].value, t[3].num);
                     int tmp = 4;
@@ -277,31 +265,31 @@ void start() {
                         tmp++;
                     }
                     printf("%d}\n", t[tmp].num);
-                    c = false;
-                    break;
+                    new_set = false;
+                    continue;
+                } 
+                i++;
+            }
+        }
+        
+        if (new_set) {
+            Hash h;
+            Set tmp;
+            tmp.len = 0;
+            h.name = t[0].value;
+                
+            int i = 3;
+            while (t[i].kind != CloseBracket && t[i].kind != End) {
+                if (t[i].kind != Comma) {
+                    add_elem(&tmp, t[i].num);
                 }
                 i++;
             }
-
-            if (c) {
-                Hash h;
-                Set tmp;
-                tmp.len = 0;
-                h.name = t[0].value;
-                
-                i = 3;
-                while (t[i].kind != CloseBracket && t[i].kind != End) {
-                    if (t[i].kind != Comma) {
-                        add_elem(&tmp, t[i].num);
-                    }
-                    i++;
-                }
-                h.name = t[0].value;
-                h.err = false;
-                h.set = tmp;
-                insert_hash(&sets, h);
-                print_hash(get_hash_from_table(t[0].value, sets));
-            }
+            h.name = t[0].value;
+            h.err = false;
+            h.set = tmp;
+            insert_hash(&sets, h);
+            print_hash(get_hash_from_table(t[0].value, sets));
         }
     }
 }
