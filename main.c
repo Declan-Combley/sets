@@ -35,6 +35,17 @@ Hash get_hash_from_table(char h, Table t)
     return t.hash[0];
 }
 
+bool is_in_table(char h, Table t)
+{
+    for (size_t i = 0; i < t.index; i++) {
+        if (t.hash[i].name == h) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void print_hash(Hash h)
 {
     printf("     %c -> ", h.name);
@@ -168,11 +179,11 @@ void start() {
         if (t[0].kind == Character && t[1].kind != End) {
             if (t[1].kind != Eq || t[2].kind != OpenBracket || t[3].kind == End) {
                 fprintf(stderr, "    %c must be initialized\n", t[0].value);
-                fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
+                fprintf(stderr, "       | try -> %c = {...}\n", t[0].value);
                 continue;
             } else if (t[2].kind != OpenBracket || t[2].kind == End) {
                 fprintf(stderr, "    %c expected an opening bracket\n", t[0].value);
-                fprintf(stderr, "       | try > %c = {...}\n", t[0].value);
+                fprintf(stderr, "       | try -> %c = {...}\n", t[0].value);
                 continue;
             } else if (t[3].kind == CloseBracket) {
                 fprintf(stderr, "    Set %c must have at least one element\n", t[0].value);
@@ -191,7 +202,7 @@ void start() {
             while (t[i].kind != End && new_set) {
                 if (t[i].kind == CloseBracket && t[i + 1].kind != End) {
                     fprintf(stderr, "   Set is already complete\n");
-                    fprintf(stderr, "       | try > %c = {%d, ", t[0].value, t[3].num);
+                    fprintf(stderr, "       | try -> %c = {%d, ", t[0].value, t[3].num);
                     int tmp = 4;
                     while (t[tmp + 1].kind != End && t[tmp + 1].kind != CloseBracket) {
                         if (t[tmp].kind != Comma) {
@@ -212,7 +223,7 @@ void start() {
                     break;
                 } else if (i % 2 == 0 && t[i].kind != Comma && t[i].kind != CloseBracket) {
                     fprintf(stderr, "    Each element of a set must be seperated by a comma\n");
-                    fprintf(stderr, "       | try > %c = {%d, ", t[0].value, t[3].num);
+                    fprintf(stderr, "       | try -> %c = {%d, ", t[0].value, t[3].num);
                     int tmp = 4;
                     while (t[tmp].kind != End && t[tmp].kind != CloseBracket) {
                         if (tmp % 2 != 0) {
@@ -243,7 +254,7 @@ void start() {
                     }
                     
                     fprintf(stderr, "    Expected another element\n");
-                    fprintf(stderr, "       | try > %c = {%d, ", t[0].value, t[3].num);
+                    fprintf(stderr, "       | try -> %c = {%d, ", t[0].value, t[3].num);
                     int tmp = 4;
                     while (t[tmp].kind != End && t[tmp].kind != CloseBracket) {
                         if (tmp % 2 != 0) {
@@ -256,7 +267,7 @@ void start() {
                     break;
                 } else if (t[i + 1].kind == End && t[i].kind != CloseBracket) {
                     fprintf(stderr, "    Expected a closing bracket\n");
-                    fprintf(stderr, "       | try > %c = {%d, ", t[0].value, t[3].num);
+                    fprintf(stderr, "       | try -> %c = {%d, ", t[0].value, t[3].num);
                     int tmp = 4;
                     while (t[tmp + 1].kind != End) {
                         if (tmp % 2 != 0) {
@@ -270,6 +281,17 @@ void start() {
                 } 
                 i++;
             }
+        } else if (t[0].kind == Character) {
+            if (!is_in_table(t[0].value, sets)) {
+                fprintf(stderr, "    %c must be initialized\n", t[0].value);
+                fprintf(stderr, "       | try -> %c = {...}\n", t[0].value);
+            } else {
+                print_set(get_hash_from_table(t[0].value, sets).set);
+            }
+            continue;
+        } else {
+            fprintf(stderr, "    not implemented yet\n");
+            continue;
         }
         
         if (new_set) {
