@@ -8,14 +8,14 @@ $ make run
 ```
 
 ## Creating And Changing Sets
-```shell
+```
 -> x = {...}
 -> x = {1, 2, 3}
 -> x = {3, 2, 1}
 ```
 
 ## Binary Operators
-```shell
+```
 -> a union b
 -> a intersect b
 -> a compliment b
@@ -23,7 +23,7 @@ $ make run
 ```
 
 ## Print Sets
-```shell
+```
 -> a = {1, 2, 3}
 -> a
        {1, 2, 3}
