@@ -17,7 +17,7 @@ void print_set(Set a)
         return;
     }
     
-    printf("{");
+    printf("    {");
     for (int i = 0; i < l - 1; i++) {
         printf("%d, ", s[i]);
     }
@@ -38,8 +38,3 @@ void add_elem(Set *s, int n)
     s->elems[s->len] = n;
     s->len++;
 }
-
-void print_bool(bool b)
-{
-    fputs((b) ? "true": "false", stdout);
-}    
