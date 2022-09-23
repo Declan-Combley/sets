@@ -9,7 +9,6 @@ typedef enum TokenKind {
     CloseBracket,
     OpenParenthesis,
     CloseParenthesis,
-    ForwardSlash,
     Hyphon,
     Pipe,
     Empty,
@@ -35,28 +34,28 @@ typedef enum TokenKind {
 } TokenKind;
 
 char tokens[][20] = {
-    "OpenBracket",
-    "CloseBracket",
-    "OpenParenthesis",
-    "CloseParenthesis",
-    "ForwardSlash",
-    "Hyphon",
-    "Pipe",
-    "Empty",
-    "Comma",
-    "Chevron",
-    "Eq",
-    "Num",
-    "Character",
-    "String",
-    "Not",
-    "Compliment",
-    "Union",
-    "Intersect",
-    "SubSet",
-    "Of",
-    "Err",
-    "End"
+    "openbracket",
+    "closebracket",
+    "openparenthesis",
+    "closeparenthesis",
+    "forwardslash",
+    "hyphon",
+    "pipe",
+    "empty",
+    "comma",
+    "chevron",
+    "eq",
+    "num",
+    "character",
+    "string",
+    "not",
+    "compliment",
+    "union",
+    "intersect",
+    "subset",
+    "of",
+    "err",
+    "end"
 };    
 
 typedef struct Token {
@@ -79,7 +78,7 @@ Token to_token(char t)
     else if (t == '|')        {token.kind = Pipe;            }
     else if (t == '=')        {token.kind = Eq;              }
     else if (t == '^')        {token.kind = Chevron;         }
-    else if (t == '\\')       {token.kind = ForwardSlash;    }
+    else if (t == '\\')       {token.kind = Compliment;      }
     else if (isdigit(t) == 0) {token.kind = Character;       }
     else if (isdigit(t) != 0) {
         token.kind = Num;
@@ -147,11 +146,12 @@ Token *tokenize(char *s)
                 i++;
             }
             
-            if      (strcmp(s, "union"    ) == 0) { tokens[counter].kind = Union;     }
-            else if (strcmp(s, "not"      ) == 0) { tokens[counter].kind = Not;       }
-            else if (strcmp(s, "intersect") == 0) { tokens[counter].kind = Intersect; }
-            else if (strcmp(s, "subset"   ) == 0) { tokens[counter].kind = SubSet;    }
-            else if (strcmp(s, "of"       ) == 0) { tokens[counter].kind = Of;        }
+            if      (strcmp(s, "union"     ) == 0) { tokens[counter].kind = Union;     }
+            else if (strcmp(s, "not"       ) == 0) { tokens[counter].kind = Not;       }
+            else if (strcmp(s, "compliment") == 0) { tokens[counter].kind = Compliment;}
+            else if (strcmp(s, "intersect" ) == 0) { tokens[counter].kind = Intersect; }
+            else if (strcmp(s, "subset"    ) == 0) { tokens[counter].kind = SubSet;    }
+            else if (strcmp(s, "of"        ) == 0) { tokens[counter].kind = Of;        }
             else {
                 strcpy(tokens[counter].string, s);
                 tokens[counter].kind = String;
@@ -174,4 +174,12 @@ Token *tokenize(char *s)
     tokens[counter].kind = End;
 
     return tokens;
+}
+
+bool is_func(TokenKind t)
+{
+    if (t == Not || t == Compliment || t == Union || t == Intersect || t == SubSet || t == Of) {
+        return true;
+    }
+    return false;
 }
