@@ -25,6 +25,16 @@ void insert_hash(Table *t, Hash h)
     t->index++;
 }
 
+void change_hash(Table *t, Hash h)
+{
+    size_t i = 0;
+    while (t->hash[i].name != h.name) {
+        i++;
+    }
+
+    t->hash[i] = h;
+}
+
 Hash get_hash_from_table(char h, Table t)
 {
     for (size_t i = 0; i < t.index; i++) {
@@ -362,7 +372,12 @@ void start() {
             h.name = t[0].value;
             h.err = false;
             h.set = tmp;
-            insert_hash(&sets, h);
+
+            if (is_in_table(h.name, sets)) {
+                change_hash(&sets, h);
+            } else {
+                insert_hash(&sets, h);
+            }
             continue;
         }
     }
