@@ -6,6 +6,8 @@
 #include "lex.c"
 #include "set.c"
 
+const char *buff = "   ";
+
 typedef struct Hash {
     char name;
     bool err;
@@ -48,17 +50,26 @@ bool is_in_table(char h, Table t)
 
 void print_hash(Hash h)
 {
-    printf("%c -> "       , h.name);
+    fputs(buff, stdout);
+    printf("%c -> ", h.name);
     print_set(h.set);
 }
 
 void print_table(Table t)
 {
     for (size_t i = 0; i < t.index; i++) {
-        printf("%c -> "       , t.hash[i].name);
+        fputs(buff, stdout);
+        printf("%c -> ", t.hash[i].name);
         print_set(t.hash[i].set);
     }
 }
+
+void print_bool(bool b)
+{
+    fputs(buff, stdout);
+    fputs((b) ? "true": "false", stdout);
+    fputs("\n", stdout);
+}    
 
 Table sets = {0};
 
@@ -167,7 +178,6 @@ Set compliment(Set s, Set a)
 }
 
 void start() {
-    char *buff = "   ";
     while (1) {
         printf("-> ");
         char in[255];
@@ -177,13 +187,14 @@ void start() {
         Token *t = tokenize(in);
         bool new_set = false;
 
-        if (t[0].kind == Character && t[1].kind != End) {
-            if (t[1].kind != Eq || t[2].kind != OpenBracket || t[3].kind == End) {
+        if (t[0].kind == Character && t[1].kind == Eq) {
+            // TODO: Fix it allowing 'x = {1'
+            if (t[2].kind != OpenBracket || t[3].kind == End) {
                 fprintf(stderr, "%s%c must be initialized\n", buff, t[0].value);
                 fprintf(stderr, "%s   | try -> %c = {...}\n", buff, t[0].value);
                 continue;
             } else if (t[2].kind != OpenBracket || t[2].kind == End) {
-                fprintf(stderr, "%s%c expected an opening bracket\n", buff, t[0].value);
+                fprintf(stderr, "%s%c Expected an opening bracket\n", buff, t[0].value);
                 fprintf(stderr, "%s   | try -> %c = {...}\n        ", buff, t[0].value);
                 continue;
             } else if (t[3].kind == CloseBracket) {
@@ -207,11 +218,11 @@ void start() {
                     int tmp = 4;
                     while (t[tmp + 1].kind != End && t[tmp + 1].kind != CloseBracket) {
                         if (t[tmp].kind != Comma) {
-                            printf(" %d, " , t[tmp].num);
+                            printf(" %d, ", t[tmp].num);
                         }
                         tmp++;
                     }
-                    printf(" %d}\n" , t[tmp].num);
+                    printf(" %d}\n", t[tmp].num);
                     new_set = false;
                     break;
                 } else if (t[i].kind != Num && t[i].kind != Comma && t[i].kind != CloseBracket) {
@@ -228,11 +239,11 @@ void start() {
                     int tmp = 4;
                     while (t[tmp].kind != End && t[tmp].kind != CloseBracket) {
                         if (tmp % 2 != 0) {
-                            printf(" %d, " , t[tmp].num);
+                            printf(" %d, ", t[tmp].num);
                         } 
                         tmp++;
                     }
-                    printf(" %d}\n" , t[tmp - 1].num);
+                    printf(" %d}\n", t[tmp - 1].num);
                     new_set = false;
                     break;
                 } else if (i % 2 == 0 && t[i].kind != CloseBracket && t[i + 1].kind != Num) {
@@ -259,11 +270,11 @@ void start() {
                     int tmp = 4;
                     while (t[tmp].kind != End && t[tmp].kind != CloseBracket) {
                         if (tmp % 2 != 0) {
-                            printf(" %d, " , t[tmp].num);
+                            printf(" %d, ", t[tmp].num);
                         } 
                         tmp++;
                     }
-                    printf(" x}\n" );
+                    printf(" x}\n");
                     new_set = false;
                     break;
                 } else if (t[i + 1].kind == End && t[i].kind != CloseBracket) {
@@ -272,11 +283,11 @@ void start() {
                     int tmp = 4;
                     while (t[tmp + 1].kind != End) {
                         if (tmp % 2 != 0) {
-                            printf(" %d, " , t[tmp].num);
+                            printf(" %d, ", t[tmp].num);
                         } 
                         tmp++;
                     }
-                    printf(" %d}\n" , t[tmp].num);
+                    printf(" %d}\n", t[tmp].num);
                     new_set = false;
                     continue;
                 } 
@@ -284,24 +295,49 @@ void start() {
             }
         } else if (t[0].kind == Character) {
             if (!is_in_table(t[0].value, sets)) {
-                fprintf(stderr, "%s%c must be initialized\n", buff, t[0].value);
+                fprintf(stderr, "%s%c must be defined\n", buff, t[0].value);
                 fprintf(stderr, "%s   | try -> %c = {...}\n", buff, t[0].value);
-            } else {
+                continue;
+            } else if (t[1].kind == End) {
+                printf("%s", buff);
                 print_set(get_hash_from_table(t[0].value, sets).set);
+            } else if (!is_func(t[1].kind)) {
+                char format = (t[2].kind == Character) ? t[2].value : 'x';
+                fprintf(stderr, "%sExpected a binary operation\n", buff);
+                fprintf(stderr, "%s   | try -> %c intersect %c \n", buff, t[0].value, format);
+                fprintf(stderr, "%s   | try -> %c union %c     \n", buff, t[0].value, format);
+            } else if (t[2].kind != Character) {
+                fprintf(stderr, "%sExpected a set             \n", buff);
+                fprintf(stderr, "%s   | try -> %c %s x        \n", buff, t[0].value, tokens[t[1].kind]);
+            } else if (!is_in_table(t[2].value, sets)) {
+                fprintf(stderr, "%s%c must be defined\n", buff, t[2].value);
+                fprintf(stderr, "%s   | try -> %c = {...}     \n", buff, t[2].value);
+            } else if (t[3].kind != End) {
+                fprintf(stderr, "%sExpression is already complete\n", buff);
+                fprintf(stderr, "%s   | try -> %c %s %c          \n", buff, t[0].value, tokens[t[1].kind], t[2].value);
+            } else {
+                if (t[1].kind == Union     ) {print_set(union_(get_hash_from_table(t[0].value, sets).set, get_hash_from_table(t[2].value, sets).set));}
+                if (t[1].kind == Intersect ) {print_set(intersect(get_hash_from_table(t[0].value, sets).set, get_hash_from_table(t[2].value, sets).set));}
+                if (t[1].kind == Compliment) {print_set(compliment(get_hash_from_table(t[0].value, sets).set, get_hash_from_table(t[2].value, sets).set));}
+                if (t[1].kind == SubSet    ) {print_bool(subset(get_hash_from_table(t[0].value, sets).set, get_hash_from_table(t[2].value, sets).set));}
             }
             continue;
         } else if (t[0].kind == Pipe) {
             if (t[1].kind != Character) {
-                fprintf(stderr, "%sexpected a set\n", buff);
+                fprintf(stderr, "%sExpected a set\n", buff);
                 fprintf(stderr, "%s  | try -> |x|\n", buff);
                 continue;
             } else if (!is_in_table(t[1].value, sets)) {
-                fprintf(stderr, "%s%c must be initialized\n", buff, t[1].value);
+                fprintf(stderr, "%s%c must be defined\n", buff, t[1].value);
                 fprintf(stderr, "%s   | try -> %c = {...}\n", buff, t[1].value);                
                 continue;
             } else if (t[2].kind != Pipe) {
-                fprintf(stderr, "%sexpected a closing pipe\n", buff);  
+                fprintf(stderr, "%sExpected a closing pipe\n", buff);  
                 fprintf(stderr, "%s   | try -> |%c|       \n", buff, t[1].value);  
+                continue;
+            } else if (t[3].kind != End) {
+                fprintf(stderr, "%sExpression is already complete\n", buff);  
+                fprintf(stderr, "%s   | try -> |%c|       \n", buff, t[1].value);
                 continue;
             }
             printf("%s%d\n", buff, get_hash_from_table(t[1].value, sets).set.len);
