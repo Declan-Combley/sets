@@ -29,7 +29,7 @@ $ make run
        {1, 2, 3}
 ```
 
-## Number of Elems
+## Number Of Elems
 ```
 -> x = {1, 2, 3}
 -> |x|
