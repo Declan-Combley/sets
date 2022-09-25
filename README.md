@@ -1,6 +1,6 @@
 # Sets
 
-Work with sets within the command line.
+Create and perform ***very basic binary operations*** on sets within the shell.
 
 ## Quickstart
 ```shell
